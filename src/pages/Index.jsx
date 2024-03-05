@@ -22,6 +22,8 @@ const Info = ({ nodes }) => {
   );
 };
 
+const MAX_RUNS = 5;
+
 const Index = () => {
   const [nodes, setNodes] = useState([
     { id: 1, value: 10, label: "A" },
@@ -29,29 +31,42 @@ const Index = () => {
     { id: 3, value: 30, label: "C" },
     { id: 4, value: 40, label: "D" },
   ]);
+  const [timeline, setTimeline] = useState([[]]);
   const [activeNodeId, setActiveNodeId] = useState(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setNodes((currentNodes) =>
-        currentNodes
-          .map((node) => ({
-            ...node,
-            value: Math.floor(Math.random() * 100),
-          }))
-          .sort((a, b) => b.value - a.value),
-      );
-    }, 3000);
+    if (timeline.length <= MAX_RUNS) {
+      const interval = setInterval(() => {
+        setTimeline((currentTimeline) => {
+          const newTimeline = [...currentTimeline];
+          if (newTimeline.length === 0 || newTimeline[newTimeline.length - 1].length > 0) {
+            newTimeline.push([...nodes]);
+          }
+          return newTimeline;
+        });
+      }, 3000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [nodes, timeline]);
+
+  const handleChangeValue = (id, newValue) => {
+    setNodes((currentNodes) => currentNodes.map((node) => (node.id === id ? { ...node, value: newValue } : node)));
+  };
 
   const handleNodeClick = (id) => {
     setActiveNodeId(activeNodeId === id ? null : id);
-  };
-
-  const handleChangeValue = (id, newValue) => {
-    setNodes((currentNodes) => currentNodes.map((node) => (node.id === id ? { ...node, value: newValue } : node)).sort((a, b) => b.value - a.value));
+    if (id !== null) {
+      setTimeline((currentTimeline) => {
+        const newTimeline = currentTimeline.map((run, index) => {
+          if (index === currentTimeline.length - 1) {
+            return run.map((node) => (node.id === id ? { ...node, value: nodes.find((n) => n.id === id).value } : node));
+          }
+          return run;
+        });
+        return newTimeline;
+      });
+    }
   };
 
   return (
