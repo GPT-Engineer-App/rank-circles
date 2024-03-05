@@ -71,12 +71,8 @@ const Index = () => {
 
   return (
     <HStack spacing={8} p={4}>
-      <VStack>
-        {nodes.map((node) => (
-          <Node key={node.id} node={node} onClick={handleNodeClick} isActive={node.id === activeNodeId} />
-        ))}
-      </VStack>
-      <Info nodes={nodes} />
+      <VStack>{timeline.length > 0 && timeline[timeline.length - 1].map((node) => <Node key={node.id} node={node} onClick={handleNodeClick} isActive={node.id === activeNodeId} />)}</VStack>
+      <Info nodes={timeline.length > 0 ? timeline[timeline.length - 1] : []} />
       {activeNodeId != null && (
         <Box>
           <Text mb={4}>Change Node Value:</Text>
